@@ -9,6 +9,8 @@ jobs:
       volumes:
         - ${{github.workspace}}:/app
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3.3.0
       - name: Running npm install
         run: npm install
       - name: Running npm run build
