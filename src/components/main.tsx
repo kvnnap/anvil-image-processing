@@ -16,7 +16,7 @@ export class Main extends React.Component<{}, MainState>
 
     click = () => {
         this.setState((state, props) => ({
-            counter: this.state.counter + 1
+            counter: state.counter + 1
         }));
     }
 
