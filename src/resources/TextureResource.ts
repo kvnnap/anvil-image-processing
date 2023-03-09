@@ -4,11 +4,27 @@ import { ITextureResource } from "./ITextureResource";
 
 export class TextureResource implements ITextureResource
 {
-    data : Uint8ClampedArray;
+    private data : Uint8ClampedArray;
+    private static readonly BytesPerPixel:number = 4;
 
     constructor(private width: number, private height: number)
     {
-        this.data = new Uint8ClampedArray(width * height * 4);
+        //this.data = new Uint8ClampedArray(width * height * 4);
+        function* generateUint8(size:number): IterableIterator<number>
+        {
+            for (let i = 0; i < size; ++i)
+            {
+                switch(i % 4)
+                {
+                    case 0:
+                    case 1:
+                    case 2:
+                        yield i < size / 2 ? 0 : 255; break;
+                    case 3: yield 255; break;
+                }
+            }
+        }
+        this.data = new Uint8ClampedArray(generateUint8(width * height * TextureResource.BytesPerPixel));
     }
 
     getDimensions(): Vector2
@@ -20,8 +36,13 @@ export class TextureResource implements ITextureResource
     get(x: number, y: number): Vector4
     {
         let i = this.twoToOneDim(x, y);
-        let v = new Vector4(this.data[i + 0], this.data[i + i], this.data[i + 2], this.data[i + 3]);
+        let v = new Vector4(this.data[i + 0], this.data[i + 1], this.data[i + 2], this.data[i + 3]);
         return v.mulScalar(1 / 255);
+    }
+
+    getData() : Uint8ClampedArray
+    {
+        return this.data;
     }
 
     // Assuming value is [0..1]
@@ -38,6 +59,8 @@ export class TextureResource implements ITextureResource
 
     private twoToOneDim(x: number, y: number) : number
     {
-        return this.height * y + x;
+        x = x < 0 ? 0 : x >= this.width ? this.width - 1 : x;
+        y = y < 0 ? 0 : y >= this.height ? this.height - 1 : y;
+        return TextureResource.BytesPerPixel * (this.height * y + x);
     }
 }

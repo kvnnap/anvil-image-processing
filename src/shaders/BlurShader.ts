@@ -3,15 +3,16 @@ import { Vector4 } from "../math/Vector4";
 import { ITextureResource } from "../resources/ITextureResource";
 import { TextureResource } from "../resources/TextureResource";
 import { IShader } from "./IShader";
+import { IShaderVisitor } from "./IShaderVisitor";
 
 export class BlurShader implements IShader
 {
     private static stdDeviations: number = 3;
     
-    private inputs: ITextureResource[];
-    private outputs: ITextureResource[];
+    private inputs: ITextureResource[] = [];
+    private outputs: ITextureResource[] = [];
 
-    private filterCoeff:number[];
+    private filterCoeff:number[] = [];
 
     getInputs(): ITextureResource[]
     {
@@ -21,6 +22,11 @@ export class BlurShader implements IShader
     getOutputs(): ITextureResource[]
     {
         throw this.outputs;
+    }
+
+    getFilterSize() : number 
+    {
+        return this.filterCoeff.length;
     }
 
     setInputs(inputs: ITextureResource[]): void
@@ -67,6 +73,7 @@ export class BlurShader implements IShader
         {
             for(let y = 0; y < dim.y; ++y)
             {
+                result = new Vector4();
                 for (let i = 0; i < filterSize; ++i)
                     result.addSelf(input.get(x + i - halfSize, y).mulScalar(this.filterCoeff[i]));
                 buffer.set(x, y, result);
@@ -74,11 +81,11 @@ export class BlurShader implements IShader
         }
 
         // second pass
-        result = new Vector4();
         for(let x = 0; x < dim.x; ++x)
         {
             for(let y = 0; y < dim.y; ++y)
             {
+                result = new Vector4();
                 for (let i = 0; i < filterSize; ++i)
                     result.addSelf(buffer.get(x, y + i - halfSize).mulScalar(this.filterCoeff[i]));
                 output.set(x, y, result);
@@ -86,4 +93,8 @@ export class BlurShader implements IShader
         }
     }
 
+    accept(visitor: IShaderVisitor): void 
+    {
+        visitor.visitBlur(this);
+    }
 }
