@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { Main } from './components/Main';
 import { TextureResource } from './resources/TextureResource';
 import { BlurShader } from './shaders/BlurShader';
+import './css/canvas.css'
 
 function main()
 {

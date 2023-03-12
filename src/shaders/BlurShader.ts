@@ -1,4 +1,5 @@
 import { Utils } from "../math/Utils";
+import { Vector2 } from "../math/Vector2";
 import { Vector4 } from "../math/Vector4";
 import { ITextureResource } from "../resources/ITextureResource";
 import { TextureResource } from "../resources/TextureResource";
@@ -64,14 +65,19 @@ export class BlurShader implements IShader
 
         let input = this.inputs[0];
         let output = this.outputs[0];
-        let dim = input.getDimensions();
+        let dimInput = input.getDimensions();
+        let dimOutput = output.getDimensions();
+        let dim = new Vector2(
+            dimInput.x < dimOutput.x ? dimInput.x : dimOutput.x,
+            dimInput.y < dimOutput.y ? dimInput.y : dimOutput.y,
+        );
 
         let buffer = new TextureResource(dim.x, dim.y);
 
         // first pass
-        for(let x = 0; x < dim.x; ++x)
+        for(let y = 0; y < dim.y; ++y)
         {
-            for(let y = 0; y < dim.y; ++y)
+            for(let x = 0; x < dim.x; ++x)
             {
                 result = new Vector4();
                 for (let i = 0; i < filterSize; ++i)
@@ -81,9 +87,9 @@ export class BlurShader implements IShader
         }
 
         // second pass
-        for(let x = 0; x < dim.x; ++x)
+        for(let y = 0; y < dim.y; ++y)
         {
-            for(let y = 0; y < dim.y; ++y)
+            for(let x = 0; x < dim.x; ++x)
             {
                 result = new Vector4();
                 for (let i = 0; i < filterSize; ++i)

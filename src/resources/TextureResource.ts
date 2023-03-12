@@ -57,10 +57,17 @@ export class TextureResource implements ITextureResource
         this.data[i + 3] = v.a;
     }
 
+    setData(data: Uint8ClampedArray, width: number, height: number)
+    {
+        this.data = data;
+        this.width = width;
+        this.height = height;
+    }
+
     private twoToOneDim(x: number, y: number) : number
     {
         x = x < 0 ? 0 : x >= this.width ? this.width - 1 : x;
         y = y < 0 ? 0 : y >= this.height ? this.height - 1 : y;
-        return TextureResource.BytesPerPixel * (this.height * y + x);
+        return TextureResource.BytesPerPixel * (this.width * y + x);
     }
 }

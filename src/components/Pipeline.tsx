@@ -1,8 +1,8 @@
 import React from 'react';
-import { ITextureResource } from '../resources/ITextureResource';
 import { TextureResource } from '../resources/TextureResource';
 import { BlurShader } from '../shaders/BlurShader';
 import { IShader } from '../shaders/IShader';
+import { ResourceManager } from './ResourceManager';
 import { Shader } from './Shader';
 import { TextureResourceComponent } from './TexutreResourceComponent';
 
@@ -65,6 +65,7 @@ export class Pipeline extends React.Component<{}, PipelineState>
                 {shadNodes}
             </div>
             <button onClick={this.clickAddShader}>Add Shader</button>
+            <ResourceManager></ResourceManager>
         </div>;
     }
 }
