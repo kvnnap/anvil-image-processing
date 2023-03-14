@@ -4,7 +4,9 @@ import { TextureResource } from '../resources/TextureResource';
 
 type TextureResourceProp = 
 {
-    textureResource: TextureResource
+    textureResource: TextureResource,
+    name: string,
+    writeCounter: number
 }
 
 export function TextureResourceComponent(props : TextureResourceProp)
@@ -43,7 +45,6 @@ export function TextureResourceComponent(props : TextureResourceProp)
     }
 
     return <div>
-        <span>Texture Resource ({dim.x} , {dim.y})</span>
         <div className='grid-container'>
             <div className='resizable' style={{width: 128}}>
                 <canvas ref={canvas} width={dim.x} height={dim.y}></canvas>
@@ -51,6 +52,7 @@ export function TextureResourceComponent(props : TextureResourceProp)
         </div>
         
         <input type="file" accept="image/*" onChange={handleFileChange} />
+        <span>{props.name}</span>
     </div>;
 }
 

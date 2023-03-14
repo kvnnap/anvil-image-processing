@@ -1,22 +1,46 @@
-import { useState } from "react";
+import { useRef } from "react";
 import { TextureResource } from "../resources/TextureResource";
 import { TextureResourceComponent } from "./TexutreResourceComponent";
 
-type ResourceManagerStateItem =
+export type ResourceManagerPropItem =
 {
     id?: number,
     name?: string,
-    texResource: TextureResource
+    texResource: TextureResource,
+    writeCounter: number
 }
 
-type ResourceManagerState =  ResourceManagerStateItem[];
+type ResourceManagerProps = {
+    resources: ResourceManagerPropItem[],
+    onResourceAdd: (resource: ResourceManagerPropItem) => void
+};
 
-export function ResourceManager()
+export function ResourceManager(props: ResourceManagerProps)
 {
-    const [state, setState] = useState<ResourceManagerState>([]);
+    let num = useRef<number>(props.resources.length);
+    let name = useRef<string>('');
 
-    let texNodes = state.map((res)=> {
-        return <TextureResourceComponent key={res.id} textureResource={res.texResource}></TextureResourceComponent>
+    let texNodes = props.resources.map((res)=> {
+        return <TextureResourceComponent key={res.id} textureResource={res.texResource} name={res.name} writeCounter={res.writeCounter}></TextureResourceComponent>
     });
-    return <div>{texNodes}</div>;
+
+    function clickAddTexRes() {
+        props.onResourceAdd({
+            id: num.current++,
+            name: name.current,
+            texResource: new TextureResource(128, 128),
+            writeCounter: 0
+        });
+    }
+
+    function nameChange(event: React.ChangeEvent<HTMLInputElement>)
+    {
+        name.current = event.target.value;
+    }
+
+    return <div>
+            <div>{texNodes}</div>
+            <input type="text" onChange={nameChange}></input>
+            <button onClick={clickAddTexRes}>Add Texture Resource</button>
+        </div>;
 }

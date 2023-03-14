@@ -9,22 +9,7 @@ export class TextureResource implements ITextureResource
 
     constructor(private width: number, private height: number)
     {
-        //this.data = new Uint8ClampedArray(width * height * 4);
-        function* generateUint8(size:number): IterableIterator<number>
-        {
-            for (let i = 0; i < size; ++i)
-            {
-                switch(i % 4)
-                {
-                    case 0:
-                    case 1:
-                    case 2:
-                        yield i < size / 2 ? 0 : 255; break;
-                    case 3: yield 255; break;
-                }
-            }
-        }
-        this.data = new Uint8ClampedArray(generateUint8(width * height * TextureResource.BytesPerPixel));
+        this.data = new Uint8ClampedArray(width * height * TextureResource.BytesPerPixel);
     }
 
     getDimensions(): Vector2

@@ -1,12 +1,11 @@
 import React from 'react';
-import { ITextureResource } from '../resources/ITextureResource';
 import { BlurShader } from '../shaders/BlurShader';
+import { ResourceManagerPropItem } from './ResourceManager';
 
 type BlurShaderProp = 
 {
     blurShader: BlurShader,
-    inputs: ITextureResource[],
-    outputs: ITextureResource[],
+    resources: ResourceManagerPropItem[],
     onChange: VoidFunction
 }
 
