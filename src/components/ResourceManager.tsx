@@ -4,7 +4,7 @@ import { TextureResourceComponent } from "./TexutreResourceComponent";
 
 export type ResourceManagerPropItem =
 {
-    id?: number,
+    id: number,
     name?: string,
     texResource: TextureResource,
     writeCounter: number
@@ -25,10 +25,11 @@ export function ResourceManager(props: ResourceManagerProps)
     });
 
     function clickAddTexRes() {
+        let dim = props.resources[0].texResource.getDimensions();
         props.onResourceAdd({
             id: num.current++,
             name: name.current,
-            texResource: new TextureResource(128, 128),
+            texResource: new TextureResource(dim.x, dim.y),
             writeCounter: 0
         });
     }

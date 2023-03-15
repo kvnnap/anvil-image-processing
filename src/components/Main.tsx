@@ -1,9 +1,6 @@
-import React from 'react';
 import { Pipeline } from './Pipeline';
 
-export class Main extends React.Component
+export function Main()
 {
-    render(): React.ReactNode {
-        return <Pipeline />;
-    }
+    return <Pipeline />;
 }

@@ -1,16 +1,17 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { ITextureResource } from '../resources/ITextureResource';
+import React, { useEffect, useState } from 'react';
 import { BlurShader } from '../shaders/BlurShader';
 import { IShader } from '../shaders/IShader';
 import { IShaderVisitor } from '../shaders/IShaderVisitor';
 import { BlurShaderComponent } from './BlurShaderComponent';
 import { ResourceManagerPropItem } from './ResourceManager';
+import { Selector } from './Selector';
 
 type ShaderProperty =
 {
     shader: IShader,
     resources: ResourceManagerPropItem[],
-    onChange: VoidFunction
+    onChange: VoidFunction,
+    onMove: (dir: number) => void
 }
 
 class ShaderComponentVisitor implements IShaderVisitor
@@ -27,29 +28,6 @@ class ShaderComponentVisitor implements IShaderVisitor
         this.NumInputs = this.NumOutputs = 1;
     }
     
-}
-
-type ResourceSelectorProps = {
-    name: string,
-    id: number,
-    resources: ResourceManagerPropItem[],
-    current?: ResourceManagerPropItem,
-    onChange?: (id:number, res: ResourceManagerPropItem) => void
-}
-function ResourceSelector(props: ResourceSelectorProps)
-{
-    function onChange(e : ChangeEvent<HTMLSelectElement>)
-    {
-        if (props.onChange)
-            props.onChange(props.id, props.resources.find((res) => res.id === parseInt(e.target.value)));
-    }
-    return props.resources.length == 0 ? null : 
-    <div>
-        <span>{props.name}{props.id}</span>
-        <select onChange={onChange} defaultValue={props.current?.id || props.resources[0].id}>
-            {props.resources.map((res) => <option key={res.id} value={res.id}>{res.id} - {res.name}</option>)}
-        </select>
-    </div>;
 }
 
 export function Shader(props:ShaderProperty)
@@ -85,8 +63,10 @@ export function Shader(props:ShaderProperty)
     }
 
     return <div>
-        {shaderInputs.map((e, id) => <ResourceSelector key={id} id={id} name={'input #'} current={e} resources={props.resources} onChange={inputChange}></ResourceSelector>)} 
-        {shaderInputs.map((e, id) => <ResourceSelector key={id} id={id} name={'output #'} current={e} resources={props.resources} onChange={outputChange}></ResourceSelector>)} 
-        {visitor.Node} 
+        {shaderInputs.map((e, id) => <Selector key={id} id={id} name={'input #'} current={e} resources={props.resources} onChange={inputChange}></Selector>)} 
+        {shaderInputs.map((e, id) => <Selector key={id} id={id} name={'output #'} current={e} resources={props.resources} onChange={outputChange}></Selector>)} 
+        {visitor.Node}
+        <button onClick={() => props.onMove(-1)}>Up</button>
+        <button onClick={() => props.onMove(1)}>Down</button>
     </div>;
 }

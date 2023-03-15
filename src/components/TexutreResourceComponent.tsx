@@ -18,7 +18,6 @@ export function TextureResourceComponent(props : TextureResourceProp)
     function updateCanvas()
     {
         let ctx = canvas.current.getContext('2d');
-        let dim = props.textureResource.getDimensions();
         ctx.putImageData(new ImageData(props.textureResource.getData(), dim.x), 0, 0);
     }
 

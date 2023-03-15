@@ -1,71 +1,38 @@
-import React from 'react';
+import { useState } from 'react';
 import { TextureResource } from '../resources/TextureResource';
-import { BlurShader } from '../shaders/BlurShader';
-import { IShader } from '../shaders/IShader';
 import { ResourceManager, ResourceManagerPropItem } from './ResourceManager';
-import { Shader } from './Shader';
+import { ShaderManager, ShaderManagerItem } from './ShaderManager';
 
 type PipelineState = {
-    shaders: IShader[]
     resources: ResourceManagerPropItem[]
 };
 
-export class Pipeline extends React.Component<{}, PipelineState>
+export function Pipeline()
 {
-    constructor(props: any)
+    let [state, setState] = useState<PipelineState>(() => ({
+        resources: [{
+            texResource: new TextureResource(128, 128),
+            writeCounter: 0,
+            id: 0,
+            name: 'input'
+        }]
+    }));
+
+    function addTexResource(resource: ResourceManagerPropItem)
     {
-        super(props);
-        this.state = {
-            shaders: [],
-            resources: [{
-                texResource: new TextureResource(128, 128),
-                writeCounter: 0,
-                id: 0,
-                name: 'input'
-            }]
-        };
-    }
-
-    clickAddShader = () => {
-        this.setState((state) => ({
-            shaders: [...state.shaders, new BlurShader()]
+        setState((prevState) => ({
+            ...prevState,
+            resources: [...prevState.resources, resource]
         }));
     }
-
-    onChange = () => {
-        this.computeShaders();
-        //alert('test');
-    }
-
-    computeShaders() {
-        this.state.shaders.forEach((s) => {
-            s.compute();
-        });
-        // we may need deep copy here
-        this.setState((state) => ({
-            resources: [...state.resources]
-        }));
-    }
-
-    addTexResource = (resource: ResourceManagerPropItem) =>
+    
+    function onCompute()
     {
-        this.setState((state) => ({
-            resources: [...state.resources, resource]
-        }));
+        setState(r => ({...r}));
     }
 
-    render(): React.ReactNode {
-        let shadNodes = this.state.shaders.map((shader, index) => {
-            return <Shader key={index} onChange={this.onChange} resources={this.state.resources} shader={shader}></Shader>;
-        });
-        return <div>
-
-            <ResourceManager resources={this.state.resources} onResourceAdd={this.addTexResource}></ResourceManager>
-            <div>
-                {shadNodes}
-            </div>
-            <button onClick={this.clickAddShader}>Add Shader</button>
-            
-        </div>;
-    }
+    return <div>
+        <ResourceManager resources={state.resources} onResourceAdd={addTexResource}></ResourceManager>
+        <ShaderManager resources={state.resources} onCompute={onCompute}></ShaderManager>
+    </div>;
 }
