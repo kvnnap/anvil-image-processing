@@ -5,19 +5,20 @@ import { TextureResource } from '../resources/TextureResource';
 type TextureResourceProp = 
 {
     textureResource: TextureResource,
-    name: string,
+    name?: string,
     writeCounter: number
 }
 
 export function TextureResourceComponent(props : TextureResourceProp)
 {
-    let canvas = useRef<HTMLCanvasElement>();
+    let canvas = useRef<HTMLCanvasElement>(null);
 
     let [dim, setDim] = useState(props.textureResource.getDimensions());
 
     function updateCanvas()
     {
-        let ctx = canvas.current.getContext('2d');
+        let ctx = canvas.current?.getContext('2d');
+        if (ctx == null) return;
         ctx.putImageData(new ImageData(props.textureResource.getData(), dim.x), 0, 0);
     }
 
@@ -27,15 +28,18 @@ export function TextureResourceComponent(props : TextureResourceProp)
 
     function handleFileChange(event: ChangeEvent<HTMLInputElement>)
     {
-        let file = event.target.files[0];
+        let file = event.target.files?.[0];
+        if (file == null) return;
 
         // For normal image types, read rgb using canvas
         let image = new Image();
         image.src = URL.createObjectURL(file)
         image.onload = (ev: Event) => {
+            if (canvas.current === null) return;
             canvas.current.width = image.width;
             canvas.current.height = image.height;
             let ctx = canvas.current.getContext('2d');
+            if (ctx == null) return;
             ctx.drawImage(image, 0, 0);
             let imageData = ctx.getImageData(0, 0, image.width, image.height);
             props.textureResource.setData(imageData.data, image.width, image.height);

@@ -62,7 +62,7 @@ if (useCdn)
 if (isProduction)
 {
     config.mode = 'production';
-    config.plugins.push(new MiniCssExtractPlugin({
+    config.plugins?.push(new MiniCssExtractPlugin({
       filename: "[name].[contenthash].css"
     }));
 

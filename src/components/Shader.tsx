@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { BlurShader } from '../shaders/BlurShader';
+import { FourierShader } from '../shaders/FourierShader';
 import { IShader } from '../shaders/IShader';
 import { IShaderVisitor } from '../shaders/IShaderVisitor';
 import { BlurShaderComponent } from './BlurShaderComponent';
+import { FourierShaderComponent } from './FourierShaderComponent';
 import { ResourceManagerPropItem } from './ResourceManager';
 import { Selector } from './Selector';
 
@@ -16,15 +18,21 @@ type ShaderProperty =
 
 class ShaderComponentVisitor implements IShaderVisitor
 {
-    public Node:React.ReactNode;
-    public NumInputs: number;
-    public NumOutputs: number;
+    public Node:React.ReactNode = null;
+    public NumInputs: number = 0;
+    public NumOutputs: number = 0;
 
     constructor(private props: ShaderProperty){};
 
     visitBlur(s: BlurShader): void
     {
         this.Node = <BlurShaderComponent onChange={this.props.onChange} resources={this.props.resources} blurShader={s} />;
+        this.NumInputs = this.NumOutputs = 1;
+    }
+
+    visitFourier(s: FourierShader): void 
+    {
+        this.Node = <FourierShaderComponent onChange={this.props.onChange} resources={this.props.resources} fourierShader={s}></FourierShaderComponent>;
         this.NumInputs = this.NumOutputs = 1;
     }
     
@@ -48,17 +56,17 @@ export function Shader(props:ShaderProperty)
         props.shader.setOutputs(shaderOutputs.map((e) => e.texResource));
     }, [shaderOutputs]);
 
-    function inputChange(id: number, inputRes: ResourceManagerPropItem)
+    function inputChange(id: number | undefined, inputRes: ResourceManagerPropItem | undefined)
     {
         let temp = [...shaderInputs];
-        temp[id] = inputRes;
+        temp[id!] = inputRes!;
         setShaderInputs(temp);
     }
 
-    function outputChange(id: number, outputRes: ResourceManagerPropItem)
+    function outputChange(id: number | undefined, outputRes: ResourceManagerPropItem | undefined)
     {
         let temp = [...shaderOutputs];
-        temp[id] = outputRes;
+        temp[id!] = outputRes!;
         setShaderOutputs(temp);
     }
 

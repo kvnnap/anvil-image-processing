@@ -1,43 +1,18 @@
 import { Utils } from "../math/Utils";
 import { Vector2 } from "../math/Vector2";
 import { Vector4 } from "../math/Vector4";
-import { ITextureResource } from "../resources/ITextureResource";
 import { TextureResource } from "../resources/TextureResource";
-import { IShader } from "./IShader";
+import { BaseShader } from "./BaseShader";
 import { IShaderVisitor } from "./IShaderVisitor";
 
-export class BlurShader implements IShader
+export class BlurShader extends BaseShader
 {
     private static stdDeviations: number = 3;
-    
-    private inputs: ITextureResource[] = [];
-    private outputs: ITextureResource[] = [];
-
     private filterCoeff:number[] = [];
-
-    getInputs(): ITextureResource[]
-    {
-        return this.inputs;
-    }
-
-    getOutputs(): ITextureResource[]
-    {
-        throw this.outputs;
-    }
 
     getFilterSize() : number 
     {
         return this.filterCoeff.length;
-    }
-
-    setInputs(inputs: ITextureResource[]): void
-    {
-        this.inputs = inputs;
-    }
-
-    setOutputs(outputs: ITextureResource[]): void
-    {
-        this.outputs = outputs;
     }
 
     setFilterSize(size: number)

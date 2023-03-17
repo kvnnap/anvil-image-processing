@@ -1,5 +1,4 @@
-import { create, erfDependencies } from 'mathjs'
-//import { erf } from 'mathjs'
+import { create, erfDependencies, fft, ifft } from 'mathjs'
 import { constants } from './Constants'
 export namespace Utils
 {
@@ -9,5 +8,15 @@ export namespace Utils
     {
         const den = 1 / (stdDev * constants.SqrtTwo);
         return 0.5 * (erf(b * den) - erf(a * den));
+    }
+
+    export function FFT(signal: number[])
+    {
+        return fft(signal);
+    }
+
+    export function IFFT(signal: number[])
+    {
+        return ifft(signal);
     }
 }

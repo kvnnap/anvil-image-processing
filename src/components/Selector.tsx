@@ -6,11 +6,11 @@ type SelectorItemBase = {
 }
 
 type SelectorProps<T> = {
-    id: number,
+    id?: number,
     name?: string,
     resources: T[],
     current?: T,
-    onChange?: (id: number, res: T) => void
+    onChange?: (id: number | undefined, res: T | undefined) => void
 }
 
 export function Selector<T extends SelectorItemBase>(props: SelectorProps<T>)

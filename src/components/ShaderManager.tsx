@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { BlurShader } from "../shaders/BlurShader";
+import { FourierShader } from "../shaders/FourierShader";
 import { IShader } from "../shaders/IShader";
 import { ResourceManagerPropItem } from "./ResourceManager";
 import { Selector } from "./Selector";
@@ -13,7 +14,7 @@ export type ShaderManagerItem = {
 type ShaderManagerProps = {
     resources: ResourceManagerPropItem[],
     onShaderAdd?: (resource: ShaderManagerItem) => void,
-    onCompute?: VoidFunction
+    onCompute: VoidFunction
 };
 type ShaderManagerState = {};
 
@@ -25,7 +26,8 @@ type ShaderType = {
 }
 const Shaders: ShaderType[] = 
 [
-    {id:0, factory:BlurShader, name: BlurShader.name}
+    {id:0, factory:BlurShader, name: BlurShader.name},
+    {id:1, factory:FourierShader, name: FourierShader.name}
 ]
 
 export function ShaderManager(props: ShaderManagerProps)
@@ -59,9 +61,10 @@ export function ShaderManager(props: ShaderManagerProps)
         });
     }
 
-    function onSelectionChange(id: number, res: ShaderType)
+    function onSelectionChange(id: number | undefined, res: ShaderType | undefined)
     {
-        setShaderId(id);
+        if (res)
+            setShaderId(res.id);
     }
 
     function compute()
@@ -71,8 +74,8 @@ export function ShaderManager(props: ShaderManagerProps)
     }
 
     return <div>
-        {shaders.map((s, idx) => <Shader key={s.id} onChange={onChange.bind(this, s.shader)} onMove={onMove.bind(this, idx)} resources={props.resources} shader={s.shader}></Shader>)}
-        <Selector id={shaderId} name={Shaders[shaderId].factory.name} resources={Shaders} current={Shaders[shaderId]} onChange={onSelectionChange}></Selector>
+        {shaders.map((s, idx) => <Shader key={s.id} onChange={onChange.bind(null, s.shader)} onMove={onMove.bind(null, idx)} resources={props.resources} shader={s.shader}></Shader>)}
+        <Selector name={Shaders[shaderId].factory.name} resources={Shaders} current={Shaders[shaderId]} onChange={onSelectionChange}></Selector>
         <button onClick={() => addShader(shaderId)}>Add {Shaders[shaderId].factory.name}</button>
         <button onClick={compute}>Compute</button>
     </div>;
