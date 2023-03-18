@@ -23,12 +23,20 @@ export namespace Utils
         return out;
     }
 
-    export function InverseFastFourierTransfrom(signal: number[])
+    export function ComplexFastFourierTransfrom(signal: number[])
+    {
+        let f = new FFT(signal.length >>> 1);
+        let out = f.createComplexArray();
+        f.transform(out, signal);
+        return out;
+    }
+
+    export function InverseFastFourierTransfrom(signal: number[], toReal:boolean = false)
     {
         let f = new FFT(signal.length >>> 1);
         let out = f.createComplexArray();
         f.inverseTransform(out, signal);
-        return f.fromComplexArray(out, null);
+        return toReal ? f.fromComplexArray(out, null) : out;
     }
 
     export function NextPowerOfTwo(n: number)
