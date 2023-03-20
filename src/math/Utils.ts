@@ -14,10 +14,7 @@ export namespace Utils
     export function FastFourierTransfrom(signal: number[])
     {
         let f = new FFT(signal.length);
-        // let out = f.createComplexArray();
-        // let a:number[] = f.toComplexArray(signal, null);
-        // f.transform(out, a);
-        let out: number[] = [];
+        let out: number[] = f.createComplexArray();
         f.realTransform(out, signal);
         f.completeSpectrum(out);
         return out;
