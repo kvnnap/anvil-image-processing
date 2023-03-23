@@ -47,67 +47,32 @@ export class FourierShader extends BaseShader
         let out = this.outputs[0];
         let dim = input.getDimensions();
 
-        const xNext = Utils.NextPowerOfTwo(dim.x);
-        const yNext = Utils.NextPowerOfTwo(dim.y);
-        const xDoubleNext = Utils.NextPowerOfTwo(dim.x << 1);
-        const yDoubleNext = Utils.NextPowerOfTwo(dim.y << 1); // complex so twice
-
-        let rSignal:number[] = Array(xNext).fill(0);
-        let gSignal:number[] = Array(xNext).fill(0);
-        let bSignal:number[] = Array(xNext).fill(0);
-
-        let fRowRed:number[][] = Array(dim.y);
-        let fRowGreen:number[][] = Array(dim.y);
-        let fRowBlue:number[][] = Array(dim.y);
-
-        let fColRed:number[][] = Array(xNext);
-        let fColGreen:number[][] = Array(xNext);
-        let fColBlue:number[][] = Array(xNext);
+        let r = Array<number[]>(dim.y);
+        let g = Array<number[]>(dim.y);
+        let b = Array<number[]>(dim.y);
 
         for (let y = 0; y < dim.y; ++y)
         {
-            // Rows
+            r[y] = Array<number>(dim.x);
+            g[y] = Array<number>(dim.x);
+            b[y] = Array<number>(dim.x);
             for (let x = 0; x < dim.x; ++x)
             {
-                rSignal[x] = input.get(x, y).r;
-                gSignal[x] = input.get(x, y).g;
-                bSignal[x] = input.get(x, y).b;
+                r[y][x] = input.get(x,y).r;
+                g[y][x] = input.get(x,y).g;
+                b[y][x] = input.get(x,y).b;
             }
-
-            fRowRed[y] = Utils.FastFourierTransfrom(rSignal);
-            fRowGreen[y] = Utils.FastFourierTransfrom(gSignal);
-            fRowBlue[y] = Utils.FastFourierTransfrom(bSignal);
         }
 
-        rSignal = Array(yDoubleNext).fill(0);
-        gSignal = Array(yDoubleNext).fill(0);
-        bSignal = Array(yDoubleNext).fill(0);
-
-        for (let x = 0; x < xNext; ++x)
-        {
-            const xTwo = x << 1;
-            // Columns
-            for (let y = 0; y < dim.y; ++y)
-            {
-                const yTwo = y << 1;
-                rSignal[yTwo] = fRowRed[y][xTwo];
-                gSignal[yTwo] = fRowGreen[y][xTwo];
-                bSignal[yTwo] = fRowBlue[y][xTwo];
-                rSignal[yTwo + 1] = fRowRed[y][xTwo + 1];
-                gSignal[yTwo + 1] = fRowGreen[y][xTwo + 1];
-                bSignal[yTwo + 1] = fRowBlue[y][xTwo + 1];
-            }
-
-            fColRed[x] = Utils.ComplexFastFourierTransfrom(rSignal);
-            fColGreen[x] = Utils.ComplexFastFourierTransfrom(gSignal);
-            fColBlue[x] = Utils.ComplexFastFourierTransfrom(bSignal);
-        }
+        let fColRed = Utils.FFT2D(r);
+        let fColGreen = Utils.FFT2D(g);
+        let fColBlue = Utils.FFT2D(b);
 
         // Convert to standard freq diagram
         fColRed = FourierShader.Shift1DFourier(fColRed);
         fColGreen = FourierShader.Shift1DFourier(fColGreen);
         fColBlue = FourierShader.Shift1DFourier(fColBlue);
-        for (let x = 0; x < xNext; ++x)
+        for (let x = 0; x < fColRed.length; ++x)
         {
             fColRed[x]   = FourierShader.VectorToComplex(FourierShader.Shift1DFourier(FourierShader.ComplexToVector(fColRed[x])));
             fColGreen[x] = FourierShader.VectorToComplex(FourierShader.Shift1DFourier(FourierShader.ComplexToVector(fColGreen[x])));
@@ -115,9 +80,23 @@ export class FourierShader extends BaseShader
         }
 
         // Do stuff here
+        for (let x = 0; x < fColRed.length; ++x)
+        {
+            for (let y = 0; y < fColRed[x].length; ++y)
+            {
+                const xFil = 20;
+                const yFil = 2*xFil;
+                const halfWidth = (fColRed.length >>> 1) - 1;
+                const halfHeight = (fColRed[x].length >>> 1) - 2;
+                if (x < (halfWidth - xFil) || x > (halfWidth + xFil) || y < (halfHeight - yFil) || y > (halfHeight + yFil + 1))
+                    fColRed[x][y] = fColGreen[x][y] = fColBlue[x][y] = 0;
+                // if (((x > xFil && x < (fColRed.length - xFil)) || (y > yFil && y < (fColRed[x].length - yFil))))
+                //     fColRed[x][y] = fColGreen[x][y] = fColBlue[x][y] = 0;
+            }
+        }
 
         // Convert from standard freq diagram
-        for (let x = 0; x < xNext; ++x)
+        for (let x = 0; x < fColRed.length; ++x)
         {
             fColRed[x]   = FourierShader.VectorToComplex(FourierShader.Shift1DFourier(FourierShader.ComplexToVector(fColRed[x]), true));
             fColGreen[x] = FourierShader.VectorToComplex(FourierShader.Shift1DFourier(FourierShader.ComplexToVector(fColGreen[x]), true));
@@ -127,41 +106,13 @@ export class FourierShader extends BaseShader
         fColGreen = FourierShader.Shift1DFourier(fColGreen, true);
         fColBlue = FourierShader.Shift1DFourier(fColBlue, true);
 
-        // Revert back
-        for (let x = 0; x < xNext; ++x)
-        {
-            fColRed[x] = Utils.InverseFastFourierTransfrom(fColRed[x]);
-            fColGreen[x] = Utils.InverseFastFourierTransfrom(fColGreen[x]);
-            fColBlue[x] = Utils.InverseFastFourierTransfrom(fColBlue[x]);
-        }
-
-        rSignal = Array(xDoubleNext).fill(0);
-        gSignal = Array(xDoubleNext).fill(0);
-        bSignal = Array(xDoubleNext).fill(0);
+        r = Utils.IFFT2D(fColRed);
+        g = Utils.IFFT2D(fColGreen);
+        b = Utils.IFFT2D(fColBlue);
 
         for (let y = 0; y < dim.y; ++y)
-        {
-            const yTwo = y << 1;
-            // Rows
-            for (let x = 0; x < xNext; ++x)
-            {
-                const xTwo = x << 1;
-                rSignal[xTwo] = fColRed[x][yTwo];
-                gSignal[xTwo] = fColGreen[x][yTwo];
-                bSignal[xTwo] = fColBlue[x][yTwo];
-                rSignal[xTwo + 1] = fColRed[x][yTwo + 1];
-                gSignal[xTwo + 1] = fColGreen[x][yTwo + 1];
-                bSignal[xTwo + 1] = fColBlue[x][yTwo + 1];
-            }
-
-            fRowRed[y] = Utils.InverseFastFourierTransfrom(rSignal, true);
-            fRowGreen[y] = Utils.InverseFastFourierTransfrom(gSignal, true);
-            fRowBlue[y] = Utils.InverseFastFourierTransfrom(bSignal, true);
-
-            // Output
             for (let x = 0; x < dim.x; ++x)
-                out.set(x, y, new Vector4(fRowRed[y][x], fRowGreen[y][x], fRowBlue[y][x], 1));
-        }
+                out.set(x, y, new Vector4(r[y][x], g[y][x], b[y][x], 1));
     }
     
 }
