@@ -1,4 +1,4 @@
-import { create, erfDependencies, sign } from 'mathjs'
+import { create, erfDependencies } from 'mathjs'
 import FFT from 'fft.js';
 import { constants } from './Constants'
 export namespace Utils
@@ -23,15 +23,15 @@ export namespace Utils
     export function ComplexFastFourierTransfrom(signal: number[])
     {
         let f = new FFT(signal.length >>> 1);
-        let out = f.createComplexArray();
+        let out: number[] = f.createComplexArray();
         f.transform(out, signal);
         return out;
     }
 
-    export function InverseFastFourierTransfrom(signal: number[], toReal:boolean = false)
+    export function InverseFastFourierTransfrom(signal: number[], toReal:boolean = false) : number[]
     {
         let f = new FFT(signal.length >>> 1);
-        let out = f.createComplexArray();
+        let out: number[] = f.createComplexArray();
         f.inverseTransform(out, signal);
         return toReal ? f.fromComplexArray(out, null) : out;
     }
@@ -47,144 +47,59 @@ export namespace Utils
         return ++n;
     }
 
+    export function ExpandToPowerOfTwo<T>(n: T[], defaultValue: () => T)
+    {
+        const oldLen = n.length;
+        const len = NextPowerOfTwo(n.length);
+        n.length = len;
+        for (let i = oldLen; i < len; ++i)
+            n[i] = defaultValue();
+    }
+
+    export function Expand2DToPowerOfTwo(n: number[][])
+    {
+        const len = NextPowerOfTwo(n[0].length);
+        ExpandToPowerOfTwo(n, () => Array<number>(len).fill(0));
+        for (let i = 0; i < n.length; ++i)
+            ExpandToPowerOfTwo(n[i], () => 0);
+    }
+
+    // input is [y][x] - [rows][cols] where n is the number of slots each element takes
+    export function Transpose<T>(arr: T[][], n: number = 1): T[][] 
+    {
+        const rows = arr.length;
+        const cols = arr[0].length;
+        const rowsTimesN = rows * n;
+        const transposedArr = new Array<T[]>(cols / n);
+        for (let i = 0; i < transposedArr.length; i++) 
+        {
+            transposedArr[i] = new Array<T>(rowsTimesN);
+            for (let j = 0; j < rows; j++)
+            {
+                for (let k = 0; k < n; k++)
+                    transposedArr[i][j * n + k] = arr[j][i * n + k];
+            }
+        }
+
+        return transposedArr;
+    }
+      
     // input is [y][x]
     export function FFT2D(signal: number[][])
     {
-        const width = NextPowerOfTwo(signal[0].length);
-        const height = NextPowerOfTwo(signal.length);
-        const twiceHeight = height << 1;
-        
-        let tempRow = Array<number[]>(signal.length);
-
-        let tempSignal = Array(width).fill(0);
-
-        // FFT on Rows
-        for (let y = 0; y < signal.length; ++y)
-        {
-            let s = signal[y];
-            for (let x = 0; x < s.length; ++x)
-                tempSignal[x] = s[x];
-            tempRow[y] = FastFourierTransfrom(tempSignal);
-        }
-
-        // FFT on columns
-        tempSignal = Array(twiceHeight).fill(0);
-        let outCol = Array(width);
-
-        for (let x = 0; x < width; ++x)
-        {
-            const xTwo = x << 1;
-            for (let y = 0; y < signal.length; ++y)
-            {
-                const yTwo = y << 1;
-                tempSignal[yTwo] = tempRow[y][xTwo];
-                tempSignal[yTwo + 1] = tempRow[y][xTwo + 1];
-            }
-            outCol[x] = ComplexFastFourierTransfrom(tempSignal);
-        }
-
-        return outCol;
+        Expand2DToPowerOfTwo(signal);
+        let rowsTransformed = signal.map(row => Utils.FastFourierTransfrom(row));
+        let colsTransformed = Transpose(rowsTransformed, 2).map(col => Utils.ComplexFastFourierTransfrom(col));
+        //return Transpose(colsTransformed, 2);
+        return colsTransformed;
     }
 
     // input is [x][y] and y is complex (hence, double size)
     export function IFFT2D(signal: number[][])
     {
-        const width = NextPowerOfTwo(signal.length);
-        const height = NextPowerOfTwo(signal[0].length); // Is complex
-        const twiceWidth = width << 1;
-
-        let tempCol = Array<number[]>(width);
-        let tempSignal = Array<number>(height).fill(0);
-
-        // Inverse FFT on columns
-        for(let x = 0; x < signal.length; ++x)
-        {
-            let s = signal[x];
-            let dest: number[];
-            if (s.length === height)
-            {
-                dest = s;
-            } else 
-            {
-                for (let y = 0; y < s.length; ++y)
-                    tempSignal[y] = s[y];
-                dest = tempSignal;
-            }
-            tempCol[x] = InverseFastFourierTransfrom(dest);
-        }
-
-        tempSignal = Array<number>(twiceWidth).fill(0);
-        let outRow = Array(height);
-
-        for (let y = 0; y < height; ++y)
-        {
-            const yTwo = y << 1;
-            for(let x = 0; x < width; ++x)
-            {
-                const xTwo = x << 1;
-                tempSignal[xTwo] = tempCol[x][yTwo];
-                tempSignal[xTwo + 1] = tempCol[x][yTwo + 1];
-            }
-
-            outRow[y] = InverseFastFourierTransfrom(tempSignal, true);
-        }
-
-        return outRow;
-    }
-
-    // input is [x][y] and y is complex (hence, double size)
-    export function IFFT2DOther(signal: number[][])
-    {
-        let rowSignal = Array<number[]>(signal[0].length >>> 1);
-
-        // Convert columns to row notation
-        for (let x = 0; x < signal.length; ++x)
-        {
-            const xTwo = x << 1;
-            for(let y = 0; y < signal[0].length >>> 1; ++y)
-            {
-                if (rowSignal[y] === undefined)
-                    rowSignal[y] = [];
-                const yTwo = y << 1;
-                rowSignal[y][xTwo] = signal[x][yTwo];
-                rowSignal[y][xTwo + 1] = signal[x][yTwo + 1];
-            }
-        }
-        
-        signal = rowSignal; // signal is now [y][x] and x is complex
-
-        const width = NextPowerOfTwo(signal[0].length >>> 1);
-        const height = NextPowerOfTwo(signal.length); // Is complex
-        const twiceWidth = width << 1;
-        const twiceHeight = height << 1;
-        let tempSignal = Array(twiceWidth).fill(0);
-        let tempRow = Array<number[]>(signal.length);
-
-         // IFFT on Rows
-         for (let y = 0; y < signal.length; ++y)
-         {
-             let s = signal[y];
-             for (let x = 0; x < s.length; ++x)
-                 tempSignal[x] = s[x];
-             tempRow[y] = InverseFastFourierTransfrom(tempSignal);
-         }
-
-         // IFFT on columns
-        tempSignal = Array(twiceHeight).fill(0);
-        let outCol = Array(width);
-
-        for (let x = 0; x < width; ++x)
-        {
-            const xTwo = x << 1;
-            for (let y = 0; y < signal.length; ++y)
-            {
-                const yTwo = y << 1;
-                tempSignal[yTwo] = tempRow[y][xTwo];
-                tempSignal[yTwo + 1] = tempRow[y][xTwo + 1];
-            }
-            outCol[x] = InverseFastFourierTransfrom(tempSignal, true);
-        }
-
-        return outCol;
+        Expand2DToPowerOfTwo(signal);
+        let rowsTransformed = signal.map(row => Utils.InverseFastFourierTransfrom(row));
+        let colsTransformed = Transpose(rowsTransformed, 2).map(col => Utils.InverseFastFourierTransfrom(col, true));
+        return colsTransformed;
     }
 }
