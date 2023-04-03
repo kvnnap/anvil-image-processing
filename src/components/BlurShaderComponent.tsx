@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BlurShader } from '../shaders/BlurShader';
 import { ResourceManagerPropItem } from './ResourceManager';
 
@@ -14,26 +14,20 @@ type BlurShaderState =
     filterSize: number
 }
 
-export class BlurShaderComponent extends React.Component<BlurShaderProp, BlurShaderState>
+export function BlurShaderComponent(props: BlurShaderProp)
 {
-    constructor(props : BlurShaderProp)
+    let [state, setState] = useState<BlurShaderState>({
+        filterSize: props.blurShader.getFilterSize()
+    });
+
+    function filterSizeChange(event: React.ChangeEvent<HTMLInputElement>)
     {
-        super(props);
-        this.state = {
-            filterSize: props.blurShader.getFilterSize()
-        };
+        props.blurShader.setFilterSize(+event.target.value);
+        setState({filterSize: props.blurShader.getFilterSize()});
+        props.onChange();
     }
 
-    filterSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => 
-    {
-        this.props.blurShader.setFilterSize(+event.target.value);
-        this.setState({filterSize: this.props.blurShader.getFilterSize()});
-        this.props.onChange();
-    }
-
-    render(): React.ReactNode {
-        return <div>
-            <input type="number" min={1} value={this.state.filterSize} onChange={this.filterSizeChange}></input>
-        </div>;
-    }
+    return <div>
+        <input type="number" min={1} value={state.filterSize} onChange={filterSizeChange}></input>
+    </div>;
 }
