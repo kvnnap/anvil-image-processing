@@ -5,8 +5,7 @@ import { TextureResource } from '../resources/TextureResource';
 type TextureResourceProp = 
 {
     textureResource: TextureResource,
-    name?: string,
-    writeCounter: number
+    name?: string
 }
 
 export function TextureResourceComponent(props : TextureResourceProp)

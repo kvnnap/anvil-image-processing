@@ -6,8 +6,7 @@ export type ResourceManagerPropItem =
 {
     id: number,
     name?: string,
-    texResource: TextureResource,
-    writeCounter: number
+    texResource: TextureResource
 }
 
 type ResourceManagerProps = {
@@ -21,7 +20,7 @@ export function ResourceManager(props: ResourceManagerProps)
     let name = useRef<string>('');
 
     let texNodes = props.resources.map((res)=> {
-        return <TextureResourceComponent key={res.id} textureResource={res.texResource} name={res.name} writeCounter={res.writeCounter}></TextureResourceComponent>
+        return <TextureResourceComponent key={res.id} textureResource={res.texResource} name={res.name}></TextureResourceComponent>
     });
 
     function clickAddTexRes() {
@@ -29,8 +28,7 @@ export function ResourceManager(props: ResourceManagerProps)
         props.onResourceAdd({
             id: num.current++,
             name: name.current,
-            texResource: new TextureResource(dim.x, dim.y),
-            writeCounter: 0
+            texResource: new TextureResource(dim.x, dim.y)
         });
     }
 

@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
 import { BlurShader } from '../shaders/BlurShader';
-import { ResourceManagerPropItem } from './ResourceManager';
+import { BaseShaderProp } from './Shader';
 
-type BlurShaderProp = 
-{
-    blurShader: BlurShader,
-    resources: ResourceManagerPropItem[],
-    onChange: VoidFunction
-}
+type BlurShaderProp = BaseShaderProp & { blurShader: BlurShader };
 
 type BlurShaderState = 
 {

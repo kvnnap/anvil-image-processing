@@ -1,12 +1,7 @@
-import { ResourceManagerPropItem } from './ResourceManager';
 import { FourierShader } from '../shaders/FourierShader';
+import { BaseShaderProp } from './Shader';
 
-type FourierShaderProp = 
-{
-    fourierShader: FourierShader,
-    resources: ResourceManagerPropItem[],
-    onChange: VoidFunction
-}
+type FourierShaderProp = BaseShaderProp & { fourierShader: FourierShader };
 
 type FourierShaderState = 
 {

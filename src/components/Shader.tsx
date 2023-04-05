@@ -16,6 +16,12 @@ type ShaderProperty =
     onMove: (dir: number) => void
 }
 
+export type BaseShaderProp = 
+{
+    resources: ResourceManagerPropItem[],
+    onChange: VoidFunction
+}
+
 class ShaderComponentVisitor implements IShaderVisitor
 {
     public Node:React.ReactNode = null;
@@ -24,15 +30,20 @@ class ShaderComponentVisitor implements IShaderVisitor
 
     constructor(private props: ShaderProperty){};
 
+    private childProps:BaseShaderProp = {
+        onChange: this.props.onChange,
+        resources: this.props.resources
+    };
+
     visitBlur(s: BlurShader): void
     {
-        this.Node = <BlurShaderComponent onChange={this.props.onChange} resources={this.props.resources} blurShader={s} />;
+        this.Node = <BlurShaderComponent {...this.childProps} blurShader={s} />;
         this.NumInputs = this.NumOutputs = 1;
     }
 
     visitFourier(s: FourierShader): void 
     {
-        this.Node = <FourierShaderComponent onChange={this.props.onChange} resources={this.props.resources} fourierShader={s}></FourierShaderComponent>;
+        this.Node = <FourierShaderComponent {...this.childProps} fourierShader={s}></FourierShaderComponent>;
         this.NumInputs = this.NumOutputs = 1;
     }
     
