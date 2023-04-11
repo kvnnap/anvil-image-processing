@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { BlurShader } from '../shaders/BlurShader';
 import { FourierShader } from '../shaders/FourierShader';
+import { GrayscaleShader } from '../shaders/GrayscaleShader';
 import { IShader } from '../shaders/IShader';
 import { IShaderVisitor } from '../shaders/IShaderVisitor';
 import { BlurShaderComponent } from './BlurShaderComponent';
 import { FourierShaderComponent } from './FourierShaderComponent';
+import { GrayscaleShaderComponent } from './GrayscaleShaderComponent';
 import { ResourceManagerPropItem } from './ResourceManager';
 import { Selector } from './Selector';
 
@@ -47,6 +49,11 @@ class ShaderComponentVisitor implements IShaderVisitor
         this.NumInputs = this.NumOutputs = 1;
     }
     
+    visitGrayscale(s: GrayscaleShader): void 
+    {
+        this.Node = <GrayscaleShaderComponent {...this.childProps} grayscaleShader={s}></GrayscaleShaderComponent>;
+        this.NumInputs = this.NumOutputs = 1;
+    }
 }
 
 export function Shader(props:ShaderProperty)

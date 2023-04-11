@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { BlurShader } from "../shaders/BlurShader";
 import { FourierShader } from "../shaders/FourierShader";
+import { GrayscaleShader } from "../shaders/GrayscaleShader";
 import { IShader } from "../shaders/IShader";
 import { ResourceManagerPropItem } from "./ResourceManager";
 import { Selector } from "./Selector";
@@ -26,8 +27,9 @@ type ShaderType = {
 }
 const Shaders: ShaderType[] = 
 [
-    {id:0, factory:BlurShader, name: BlurShader.name},
-    {id:1, factory:FourierShader, name: FourierShader.name}
+    {id:0, factory:BlurShader, name: "Blur"},
+    {id:1, factory:FourierShader, name: "Fourier"},
+    {id:2, factory:GrayscaleShader, name: "Grayscale"}
 ]
 
 export function ShaderManager(props: ShaderManagerProps)
