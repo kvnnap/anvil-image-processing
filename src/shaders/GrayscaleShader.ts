@@ -14,6 +14,7 @@ export class GrayscaleShader extends BaseShader
         let input = this.inputs[0];
         let output = this.outputs[0];
         let dim = input.getDimensions();
+        output.setDimensions(dim.x, dim.y);
 
         for(let y = 0; y < dim.y; ++y)
         {

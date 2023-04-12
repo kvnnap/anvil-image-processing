@@ -63,6 +63,8 @@ export class FourierShader extends BaseShader
 
         // Convert to standard freq diagram
         fColRed = FourierShader.Shift1DFourier(fColRed);
+        outMag.setDimensions(fColRed.length, fColRed[0].length >>> 1);
+        outPhase.setDimensions(fColRed.length, fColRed[0].length >>> 1);
         for (let x = 0; x < fColRed.length; ++x)
         {
             let col = FourierShader.Shift1DFourier(FourierShader.ComplexToVector(fColRed[x]));
@@ -84,6 +86,8 @@ export class FourierShader extends BaseShader
         let out = this.outputs[0];
         let dim = mag.getDimensions();
 
+        out.setDimensions(dim.x, dim.y);
+        
         let fColRedVec = Array<Vector2[]>(dim.x);
         let fColRed = Array<number[]>(dim.x);
         for(let x = 0; x < dim.x; ++x)

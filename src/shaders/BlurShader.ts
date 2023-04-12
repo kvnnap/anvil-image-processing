@@ -41,6 +41,7 @@ export class BlurShader extends BaseShader
         let input = this.inputs[0];
         let output = this.outputs[0];
         let dimInput = input.getDimensions();
+        output.setDimensions(dimInput.x, dimInput.y);
         let dimOutput = output.getDimensions();
         let dim = new Vector2(
             dimInput.x < dimOutput.x ? dimInput.x : dimOutput.x,

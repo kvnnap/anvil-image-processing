@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useReducer, useRef, useState } from 'react';
 import { Vector2 } from '../math/Vector2';
 import { TextureResource } from '../resources/TextureResource';
 import { OrderedCheckboxes } from './OrderedCheckboxes';
@@ -27,15 +27,19 @@ type ChainsType = typeof Chains;
 
 export function TextureResourceComponent(props : TextureResourceProp)
 {
-    let canvas = useRef<HTMLCanvasElement>(null);
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
+    const canvas = useRef<HTMLCanvasElement>(null);
 
-    let [dim, setDim] = useState(props.textureResource.getDimensions());
-    let [chain, setChain] = useState<ChainsType>();
+    const [chain, setChain] = useState<ChainsType>([]);
 
     function updateCanvas()
     {
-        let ctx = canvas.current?.getContext('2d');
+        if (canvas?.current == null) return;
+        let ctx = canvas.current.getContext('2d');
         if (ctx == null) return;
+        let dim = props.textureResource.getDimensions();
+        canvas.current.width = dim.x;
+        canvas.current.height = dim.y;
         let rawData = Array.from(props.textureResource.getData());
         chain?.forEach(c => rawData = c.fn(rawData));
         let data = new Uint8ClampedArray(rawData.map(v => v * 255.0));
@@ -65,7 +69,7 @@ export function TextureResourceComponent(props : TextureResourceProp)
             const r = 1 / 255;
             let data = new Float32Array(Array.from(imageData.data).map(v => v * r));
             props.textureResource.setData(data, image.width, image.height);
-            setDim(new Vector2(image.width, image.height));
+            forceUpdate();
         };
     }
 
@@ -77,7 +81,7 @@ export function TextureResourceComponent(props : TextureResourceProp)
     return <div>
         <div className='grid-container'>
             <div className='resizable' style={{width: 128}}>
-                <canvas ref={canvas} width={dim.x} height={dim.y}></canvas>
+                <canvas ref={canvas}></canvas>
             </div>
         </div>
         

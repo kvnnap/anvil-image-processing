@@ -12,6 +12,15 @@ export class TextureResource implements ITextureResource
         this.data = new Float32Array(width * height * TextureResource.ElementsPerPixel);
     }
 
+    setDimensions(w: number, h: number): void
+    {
+        if (this.width === w && this.height === h)
+            return;
+        this.data = new Float32Array(w * h * TextureResource.ElementsPerPixel);
+        this.width = w;
+        this.height = h;
+    }
+
     getDimensions(): Vector2
     {
         return new Vector2(this.width, this.height);
@@ -23,7 +32,6 @@ export class TextureResource implements ITextureResource
         let i = this.twoToOneDim(x, y);
         let v = new Vector4(this.data[i + 0], this.data[i + 1], this.data[i + 2], this.data[i + 3]);
         return v;
-        //return v.mulScalar(1 / 255);
     }
 
     getData() : Float32Array
@@ -31,12 +39,10 @@ export class TextureResource implements ITextureResource
         return this.data;
     }
 
-    // Assuming value is [0..1]
     set(x: number, y: number, value: Vector4): void
     {
         let i = this.twoToOneDim(x, y);
         let v = value;
-        //v = v.mulScalar(255);
         this.data[i + 0] = v.r;
         this.data[i + 1] = v.g;
         this.data[i + 2] = v.b;
