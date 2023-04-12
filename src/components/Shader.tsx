@@ -46,7 +46,7 @@ class ShaderComponentVisitor implements IShaderVisitor
     visitFourier(s: FourierShader): void 
     {
         this.Node = <FourierShaderComponent {...this.childProps} fourierShader={s}></FourierShaderComponent>;
-        this.NumInputs = this.NumOutputs = 1;
+        this.NumInputs = this.NumOutputs = 2;
     }
     
     visitGrayscale(s: GrayscaleShader): void 

@@ -6,6 +6,8 @@ import { IShaderVisitor } from "./IShaderVisitor";
 
 export class FourierShader extends BaseShader
 {
+    private computingInverse:boolean = false;
+
     accept(visitor: IShaderVisitor): void
     {
         visitor.visitFourier(this);
@@ -67,7 +69,6 @@ export class FourierShader extends BaseShader
             for(let y = 0; y < col.length; ++y)
             {
                 let mag = Math.sqrt(col[y].x * col[y].x + col[y].y * col[y].y);
-                mag /= dim.x * dim.y; // TEmporary norm
                 let phase = Math.atan2(col[y].y, col[y].x);
                 outMag.set(x, y, new Vector4(mag, mag, mag, 1));
                 outPhase.set(x, y, new Vector4(phase, phase, phase, 1));
@@ -83,17 +84,19 @@ export class FourierShader extends BaseShader
         let out = this.outputs[0];
         let dim = mag.getDimensions();
 
-        let fColRedVec: Vector2[][] = [];
-        let fColRed: number[][] = [];
+        let fColRedVec = Array<Vector2[]>(dim.x);
+        let fColRed = Array<number[]>(dim.x);
         for(let x = 0; x < dim.x; ++x)
         {
+            fColRedVec[x] = Array<Vector2>(dim.y);
             for (let y = 0; y < dim.y; ++y)
             {
                 let theta = phase.get(x,y).r;
                 let r = mag.get(x,y).r;
-                r *= dim.x * dim.y;
-                fColRedVec[x][y].x =  r * Math.cos(theta);
-                fColRedVec[x][y].y =  r * Math.sin(theta);
+                let v  = new Vector2();
+                v.x =  r * Math.cos(theta);
+                v.y =  r * Math.sin(theta);
+                fColRedVec[x][y] = v;
             }
             fColRed[x] = FourierShader.VectorToComplex(FourierShader.Shift1DFourier(fColRedVec[x], true));
         }
@@ -105,8 +108,17 @@ export class FourierShader extends BaseShader
                 out.set(x, y, new Vector4(r[y][x], r[y][x], r[y][x], 1));
     }
 
+    setMode(computingInverse: boolean)
+    {
+        this.computingInverse = computingInverse;
+    }
+
     compute(): void 
     {
+        return this.computingInverse ? this.computeIFFT() : this.computeFFT();
     }
-    
+ 
+    getMode() {
+        return this.computingInverse;
+    }
 }
