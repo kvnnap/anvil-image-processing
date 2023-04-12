@@ -1,5 +1,4 @@
 import { ChangeEvent, useEffect, useReducer, useRef, useState } from 'react';
-import { Vector2 } from '../math/Vector2';
 import { TextureResource } from '../resources/TextureResource';
 import { OrderedCheckboxes } from './OrderedCheckboxes';
 
@@ -19,9 +18,14 @@ function ToneMappingChain(data: number[]) {
     return data.map(d => d / (d + 1));
 }
 
+function LogMapChain(data: number[]) {
+    return data.map(d => Math.log10(d));
+}
+
 const Chains = [
-    {id: 0, name: "Alpha Correction", fn: AlphaCorrectionChain},
-    {id: 1, name: "Tone Mapping", fn: ToneMappingChain}
+    {id: 0, name: "Log", fn: LogMapChain},
+    {id: 1, name: "Alpha Correction", fn: AlphaCorrectionChain},
+    {id: 2, name: "Tone Mapping", fn: ToneMappingChain}
 ];
 type ChainsType = typeof Chains;
 

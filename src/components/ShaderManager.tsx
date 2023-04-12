@@ -6,6 +6,7 @@ import { IShader } from "../shaders/IShader";
 import { ResourceManagerPropItem } from "./ResourceManager";
 import { Selector } from "./Selector";
 import { Shader } from "./Shader";
+import { MaskShader } from "../shaders/MaskShader";
 
 export type ShaderManagerItem = {
     id: number,
@@ -29,7 +30,8 @@ const Shaders: ShaderType[] =
 [
     {id:0, factory:BlurShader, name: "Blur"},
     {id:1, factory:FourierShader, name: "Fourier"},
-    {id:2, factory:GrayscaleShader, name: "Grayscale"}
+    {id:2, factory:GrayscaleShader, name: "Grayscale"},
+    {id:3, factory:MaskShader, name: "Mask"}
 ]
 
 export function ShaderManager(props: ShaderManagerProps)

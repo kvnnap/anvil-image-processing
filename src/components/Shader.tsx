@@ -9,6 +9,8 @@ import { FourierShaderComponent } from './FourierShaderComponent';
 import { GrayscaleShaderComponent } from './GrayscaleShaderComponent';
 import { ResourceManagerPropItem } from './ResourceManager';
 import { Selector } from './Selector';
+import { MaskShader } from '../shaders/MaskShader';
+import { MaskShaderComponent } from './MaskShaderComponent';
 
 type ShaderProperty =
 {
@@ -54,6 +56,12 @@ class ShaderComponentVisitor implements IShaderVisitor
         this.Node = <GrayscaleShaderComponent {...this.childProps} grayscaleShader={s}></GrayscaleShaderComponent>;
         this.NumInputs = this.NumOutputs = 1;
     }
+
+    visitMask(s: MaskShader): void 
+    {
+        this.Node = <MaskShaderComponent {...this.childProps} maskShader={s}></MaskShaderComponent>;
+        this.NumInputs = 2; this.NumOutputs = 1;
+    }
 }
 
 export function Shader(props:ShaderProperty)
@@ -90,7 +98,7 @@ export function Shader(props:ShaderProperty)
 
     return <div>
         {shaderInputs.map((e, id) => <Selector key={id} id={id} name={'input #'} current={e} resources={props.resources} onChange={inputChange}></Selector>)} 
-        {shaderInputs.map((e, id) => <Selector key={id} id={id} name={'output #'} current={e} resources={props.resources} onChange={outputChange}></Selector>)} 
+        {shaderOutputs.map((e, id) => <Selector key={id} id={id} name={'output #'} current={e} resources={props.resources} onChange={outputChange}></Selector>)} 
         {visitor.Node}
         <button onClick={() => props.onMove(-1)}>Up</button>
         <button onClick={() => props.onMove(1)}>Down</button>
