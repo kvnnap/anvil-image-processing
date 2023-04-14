@@ -59,15 +59,15 @@ export class FourierShader extends BaseShader
                 r[y][x] = input.get(x,y).r;
         }
 
-        let fColRed = Utils.FFT2D(r);
+        let cols = Utils.FFT2D(r);
 
         // Convert to standard freq diagram
-        fColRed = FourierShader.Shift1DFourier(fColRed);
-        outMag.setDimensions(fColRed.length, fColRed[0].length >>> 1);
-        outPhase.setDimensions(fColRed.length, fColRed[0].length >>> 1);
-        for (let x = 0; x < fColRed.length; ++x)
+        cols = FourierShader.Shift1DFourier(cols);
+        outMag.setDimensions(cols.length, cols[0].length >>> 1);
+        outPhase.setDimensions(cols.length, cols[0].length >>> 1);
+        for (let x = 0; x < cols.length; ++x)
         {
-            let col = FourierShader.Shift1DFourier(FourierShader.ComplexToVector(fColRed[x]));
+            let col = FourierShader.Shift1DFourier(FourierShader.ComplexToVector(cols[x]));
             for(let y = 0; y < col.length; ++y)
             {
                 let mag = Math.sqrt(col[y].x * col[y].x + col[y].y * col[y].y);
@@ -88,11 +88,11 @@ export class FourierShader extends BaseShader
 
         out.setDimensions(dim.x, dim.y);
         
-        let fColRedVec = Array<Vector2[]>(dim.x);
-        let fColRed = Array<number[]>(dim.x);
+        let colsVec = Array<Vector2[]>(dim.x);
+        let cols = Array<number[]>(dim.x);
         for(let x = 0; x < dim.x; ++x)
         {
-            fColRedVec[x] = Array<Vector2>(dim.y);
+            colsVec[x] = Array<Vector2>(dim.y);
             for (let y = 0; y < dim.y; ++y)
             {
                 let theta = phase.get(x,y).r;
@@ -100,13 +100,13 @@ export class FourierShader extends BaseShader
                 let v  = new Vector2();
                 v.x =  r * Math.cos(theta);
                 v.y =  r * Math.sin(theta);
-                fColRedVec[x][y] = v;
+                colsVec[x][y] = v;
             }
-            fColRed[x] = FourierShader.VectorToComplex(FourierShader.Shift1DFourier(fColRedVec[x], true));
+            cols[x] = FourierShader.VectorToComplex(FourierShader.Shift1DFourier(colsVec[x], true));
         }
-        fColRed = FourierShader.Shift1DFourier(fColRed, true);
+        cols = FourierShader.Shift1DFourier(cols, true);
 
-        let r = Utils.IFFT2D(fColRed);
+        let r = Utils.IFFT2D(cols);
         for (let y = 0; y < dim.y; ++y)
             for (let x = 0; x < dim.x; ++x)
                 out.set(x, y, new Vector4(r[y][x], r[y][x], r[y][x], 1));

@@ -47,13 +47,17 @@ export namespace Utils
         return ++n;
     }
 
-    export function ExpandToPowerOfTwo<T>(n: T[], defaultValue: () => T)
+    export function ExpandToLength<T>(n: T[], defaultValue: () => T, len: number)
     {
         const oldLen = n.length;
-        const len = NextPowerOfTwo(n.length);
         n.length = len;
         for (let i = oldLen; i < len; ++i)
             n[i] = defaultValue();
+    }
+
+    export function ExpandToPowerOfTwo<T>(n: T[], defaultValue: () => T)
+    {
+        return ExpandToLength(n, defaultValue, NextPowerOfTwo(n.length));
     }
 
     export function Expand2DToPowerOfTwo(n: number[][])
@@ -62,6 +66,14 @@ export namespace Utils
         ExpandToPowerOfTwo(n, () => Array<number>(len).fill(0));
         for (let i = 0; i < n.length; ++i)
             ExpandToPowerOfTwo(n[i], () => 0);
+    }
+
+    export function Expand2DToSquarePowerOfTwo(n : number[][])
+    {
+        const len = NextPowerOfTwo(Math.max(n.length, n[0]?.length ?? 0));
+        ExpandToLength(n, () => Array<number>(len).fill(0), len);
+        for (let i = 0; i < n.length; ++i)
+            ExpandToLength(n[i], () => 0, len);
     }
 
     // input is [y][x] - [rows][cols] where n is the number of slots each element takes
@@ -87,7 +99,7 @@ export namespace Utils
     // input is [y][x]
     export function FFT2D(signal: number[][])
     {
-        Expand2DToPowerOfTwo(signal);
+        Expand2DToSquarePowerOfTwo(signal);
         let rowsTransformed = signal.map(row => Utils.FastFourierTransfrom(row));
         let colsTransformed = Transpose(rowsTransformed, 2).map(col => Utils.ComplexFastFourierTransfrom(col));
         //return Transpose(colsTransformed, 2);
