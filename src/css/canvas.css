@@ -17,4 +17,5 @@
 
 .resizable img, .resizable canvas {
     width: 100%;
+    image-rendering: pixelated;
 }

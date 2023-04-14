@@ -99,7 +99,7 @@ export namespace Utils
     // input is [y][x]
     export function FFT2D(signal: number[][])
     {
-        Expand2DToSquarePowerOfTwo(signal);
+        Expand2DToPowerOfTwo(signal);
         let rowsTransformed = signal.map(row => Utils.FastFourierTransfrom(row));
         let colsTransformed = Transpose(rowsTransformed, 2).map(col => Utils.ComplexFastFourierTransfrom(col));
         //return Transpose(colsTransformed, 2);

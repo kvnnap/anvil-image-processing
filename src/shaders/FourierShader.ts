@@ -18,8 +18,6 @@ export class FourierShader extends BaseShader
         const mid = (list.length >>> 1) + (inverse ? -1 : 1);
         let a = list.slice(mid);
         let b = list.slice(0, mid);
-        let r = inverse ? b : a;
-        r.reverse();
         return a.concat(b);
     }
 
