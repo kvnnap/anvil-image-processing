@@ -80,8 +80,8 @@ export function ShaderManager(props: ShaderManagerProps)
 
     return <div>
         {shaders.map((s, idx) => <Shader key={s.id} onChange={onChange.bind(null, s.shader)} onMove={onMove.bind(null, idx)} resources={props.resources} shader={s.shader}></Shader>)}
-        <Selector name={Shaders[shaderId].factory.name} resources={Shaders} current={Shaders[shaderId]} onChange={onSelectionChange}></Selector>
-        <button onClick={() => addShader(shaderId)}>Add {Shaders[shaderId].factory.name}</button>
+        <Selector name={Shaders[shaderId].name} resources={Shaders} current={Shaders[shaderId]} onChange={onSelectionChange}></Selector>
+        <button onClick={() => addShader(shaderId)}>Add {Shaders[shaderId].name}</button>
         <button onClick={compute}>Compute</button>
     </div>;
 }
