@@ -74,6 +74,7 @@ export function ShaderManager(props: ShaderManagerProps)
     function compute()
     {
         shaders.forEach(s => s.shader.compute());
+        props.resources.forEach(r => r.texResPubSub.publish(0));
         props.onCompute();
     }
 

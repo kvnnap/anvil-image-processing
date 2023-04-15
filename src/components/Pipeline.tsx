@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { TextureResource } from '../resources/TextureResource';
 import { ResourceManager, ResourceManagerPropItem } from './ResourceManager';
 import { ShaderManager } from './ShaderManager';
+import { PubSub } from '../helpers/PubSub';
 
 type PipelineState = {
     resources: ResourceManagerPropItem[]
@@ -12,6 +13,7 @@ export function Pipeline()
     let [state, setState] = useState<PipelineState>(() => ({
         resources: [{
             texResource: new TextureResource(128, 128),
+            texResPubSub: new PubSub<number>(),
             id: 0,
             name: 'input'
         }]

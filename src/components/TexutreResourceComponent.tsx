@@ -1,11 +1,11 @@
 import { ChangeEvent, useEffect, useReducer, useRef, useState } from 'react';
-import { TextureResource } from '../resources/TextureResource';
 import { OrderedCheckboxes } from './OrderedCheckboxes';
+import { Canvas } from './Canvas';
+import { ResourceManagerPropItem } from './ResourceManager';
 
 type TextureResourceProp = 
 {
-    textureResource: TextureResource,
-    name?: string
+    res: ResourceManagerPropItem
 }
 
 function AlphaCorrectionChain(data: number[]) {
@@ -31,28 +31,25 @@ type ChainsType = typeof Chains;
 
 export function TextureResourceComponent(props : TextureResourceProp)
 {
-    const [, forceUpdate] = useReducer(x => x + 1, 0);
-    const canvas = useRef<HTMLCanvasElement>(null);
-
     const [chain, setChain] = useState<ChainsType>([]);
+    const [data, setData] = useState<Uint8ClampedArray>(() => new Uint8ClampedArray());
+    const texResource = props.res.texResource;
 
     function updateCanvas()
     {
-        if (canvas?.current == null) return;
-        let ctx = canvas.current.getContext('2d');
-        if (ctx == null) return;
-        let dim = props.textureResource.getDimensions();
-        canvas.current.width = dim.x;
-        canvas.current.height = dim.y;
-        let rawData = Array.from(props.textureResource.getData());
+        let rawData = Array.from(texResource.getData());
         chain?.forEach(c => rawData = c.fn(rawData));
-        let data = new Uint8ClampedArray(rawData.map(v => v * 255.0));
-        ctx.putImageData(new ImageData(data, dim.x), 0, 0);
+        setData(new Uint8ClampedArray(rawData.map(v => v * 255.0)));
     }
 
     useEffect(() => {
         updateCanvas();
-    });
+    }, [chain]);
+
+    useEffect(()=>{
+        const subscription = props.res.texResPubSub.subscribe(updateCanvas);
+        return () => subscription.unsubscribe();
+    }, []);
 
     function handleFileChange(event: ChangeEvent<HTMLInputElement>)
     {
@@ -63,35 +60,26 @@ export function TextureResourceComponent(props : TextureResourceProp)
         let image = new Image();
         image.src = URL.createObjectURL(file)
         image.onload = (ev: Event) => {
-            if (canvas.current === null) return;
-            canvas.current.width = image.width;
-            canvas.current.height = image.height;
-            let ctx = canvas.current.getContext('2d');
+            let canvas = document.createElement('canvas');
+            let ctx = canvas.getContext('2d');
             if (ctx == null) return;
+            canvas.width = image.width;
+            canvas.height = image.height;
             ctx.drawImage(image, 0, 0);
             let imageData = ctx.getImageData(0, 0, image.width, image.height);
-            const r = 1 / 255;
+            const r = 1.0 / 255.0;
             let data = new Float32Array(Array.from(imageData.data).map(v => v * r));
-            props.textureResource.setData(data, image.width, image.height);
-            forceUpdate();
+            texResource.setData(data, image.width, image.height);
+            props.res.texResPubSub.publish(1);
         };
     }
 
-    function postProcChainChange(chain: ChainsType)
-    {
-        setChain(chain);
-    }
-
     return <div>
-        <div className='grid-container'>
-            <div className='resizable' style={{width: 128}}>
-                <canvas ref={canvas}></canvas>
-            </div>
-        </div>
+        <Canvas data={data} width={texResource.getDimensions().x}></Canvas>
         
         <input type="file" accept="image/*" onChange={handleFileChange} />
-        <span>{props.name}</span>
-        <OrderedCheckboxes items={Chains} onSelectionChange={postProcChainChange}></OrderedCheckboxes>
+        <span>{props.res.name}</span>
+        <OrderedCheckboxes items={Chains} onSelectionChange={c => setChain(c)}></OrderedCheckboxes>
     </div>;
 }
 

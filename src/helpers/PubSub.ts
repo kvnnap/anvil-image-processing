@@ -2,7 +2,7 @@ type Callback<T> = (data: T) => void;
 
 export class PubSub<T>
 {
-    constructor(private subs: Callback<T>[]){}
+    private subs: Callback<T>[] = [];
     
     publish(data: T, exclude?: Callback<T>)
     {
