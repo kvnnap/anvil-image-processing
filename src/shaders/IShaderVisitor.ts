@@ -2,6 +2,7 @@ import { BlurShader } from "./BlurShader";
 import { FourierShader } from "./FourierShader";
 import { GrayscaleShader } from "./GrayscaleShader";
 import { MaskShader } from "./MaskShader";
+import { WaveletShader } from "./WaveletShader";
 
 export interface IShaderVisitor
 {
@@ -9,4 +10,5 @@ export interface IShaderVisitor
     visitGrayscale(s: GrayscaleShader) : void;
     visitMask(s: MaskShader) : void;
     visitFourier(s: FourierShader) : void;
+    visitWavelet(s: WaveletShader) : void;
 }

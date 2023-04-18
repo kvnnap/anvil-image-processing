@@ -11,6 +11,8 @@ import { ResourceManagerPropItem } from './ResourceManager';
 import { Selector } from './Selector';
 import { MaskShader } from '../shaders/MaskShader';
 import { MaskShaderComponent } from './MaskShaderComponent';
+import { WaveletShader } from '../shaders/WaveletShader';
+import { WaveletShaderComponent } from './WaveletShaderComponent';
 
 type ShaderProperty =
 {
@@ -51,6 +53,11 @@ class ShaderComponentVisitor implements IShaderVisitor
         this.NumInputs = this.NumOutputs = 2;
     }
     
+    visitWavelet(s: WaveletShader): void {
+        this.Node = <WaveletShaderComponent {...this.childProps} waveletShader={s}></WaveletShaderComponent>;
+        this.NumInputs = this.NumOutputs = 1;
+    }
+
     visitGrayscale(s: GrayscaleShader): void 
     {
         this.Node = <GrayscaleShaderComponent {...this.childProps} grayscaleShader={s}></GrayscaleShaderComponent>;

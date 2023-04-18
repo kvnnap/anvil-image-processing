@@ -55,7 +55,8 @@ if (useCdn)
 {
   config.externals = {
     'react': 'React',
-    'react-dom': 'ReactDOM'
+    'react-dom': 'ReactDOM',
+    'discrete-wavelets': 'wt'
   };
 }
 

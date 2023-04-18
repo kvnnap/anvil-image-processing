@@ -19,7 +19,7 @@ function ToneMappingChain(data: number[]) {
 }
 
 function LogMapChain(data: number[]) {
-    return data.map(d => Math.log10(d));
+    return data.map(d => Math.log10(d + 1));
 }
 
 const Chains = [
