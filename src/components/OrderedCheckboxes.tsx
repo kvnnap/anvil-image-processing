@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type ItemBase = {
     id: number,
@@ -7,6 +7,7 @@ type ItemBase = {
 
 type OrderedCheckboxesProps<T extends ItemBase> = {
     items: T[],
+    selected?: T[],
     onSelectionChange: (items:T[]) => void,
 };
 
@@ -18,23 +19,26 @@ export function OrderedCheckboxes<T extends ItemBase>(props: OrderedCheckboxesPr
 {
     function initItems()
     {
-        return props.items.map(v => ({...v, checked: false}));
+        return props.items.map(v => ({...v, checked: (props.selected?.indexOf(v) ?? -1) >= 0}));
     }
     
     let [items, setItems] = useState<ItemWithChecked<T>[]>(initItems);
+    let flag = useRef<boolean>(true);
 
     // This should never happen, parent changing items for Texture Post Proc methods
     useEffect(() => {
         setItems(initItems());
-    }, [props.items]);
+    }, [props.items, props.selected]);
 
     // Whenever items (state) change, update the parent
     useEffect(() => {
+        if (flag.current) return; // Trigger changes only when actually clicked
         props.onSelectionChange(items.filter(p => p.checked));
     }, [items]);
 
     function onChange(checked: boolean, i: number)
     {
+        flag.current = false;
         setItems((prev) => {
             let updated = [...prev];
             updated[i].checked = checked;
