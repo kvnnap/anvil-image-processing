@@ -15,6 +15,17 @@ type ItemWithChecked<T> =  T & {
     checked: boolean
 }
 
+function useIsFirstRender() : boolean
+{
+    const isFirst = useRef<boolean>(true);
+    if (isFirst.current)
+    {
+        isFirst.current = false;
+        return true;
+    }
+    return isFirst.current;
+}
+
 export function OrderedCheckboxes<T extends ItemBase>(props: OrderedCheckboxesProps<T>)
 {
     function initItems()
@@ -23,22 +34,22 @@ export function OrderedCheckboxes<T extends ItemBase>(props: OrderedCheckboxesPr
     }
     
     let [items, setItems] = useState<ItemWithChecked<T>[]>(initItems);
-    let flag = useRef<boolean>(true);
+    let firstRender = useIsFirstRender();
 
     // This should never happen, parent changing items for Texture Post Proc methods
     useEffect(() => {
+        if (firstRender) return;
         setItems(initItems());
     }, [props.items, props.selected]);
 
     // Whenever items (state) change, update the parent
     useEffect(() => {
-        if (flag.current) return; // Trigger changes only when actually clicked
+        if (firstRender) return;
         props.onSelectionChange(items.filter(p => p.checked));
     }, [items]);
 
     function onChange(checked: boolean, i: number)
     {
-        flag.current = false;
         setItems((prev) => {
             let updated = [...prev];
             updated[i].checked = checked;
